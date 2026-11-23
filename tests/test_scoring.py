@@ -272,7 +272,7 @@ def test_multiple_company_associations_normalized():
     ]
     assert normalized == normalize_activities(activities=activities, activity_type="Email")
 
-def test_group_actvities_singular_company_assocation():
+def test_group_activities_singular_company_association():
     activities = [
         {
             "activity_type": "Call",
@@ -311,7 +311,7 @@ def test_group_actvities_singular_company_assocation():
     }
     assert grouped_activities == exp_grouped_activites
 
-def test_group_activities_multiple_compansy_association():
+def test_group_activities_multiple_company_association():
         activities = [
         {
             "activity_type": "Call",
