@@ -178,7 +178,7 @@ The structure may evolve as scoring, testing, and synchronization components are
 - [ ] Retry-After header support
 - [ ] Safe write retries and idempotency
 - [ ] Structured logging
-- [ ] Automated tests
+- [x] Automated tests
 - [ ] End-to-end demonstration
 - [ ] Architecture documentation
 
