@@ -172,7 +172,7 @@ The structure may evolve as scoring, testing, and synchronization components are
 - [x] Call, email, and meeting activity inspection
 - [x] Initial activity classification rules
 - [x] Basic retry logic with exponential backoff
-- [ ] Engagement scoring model
+- [x] Engagement scoring model
 - [ ] Account-level activity aggregation
 - [ ] HubSpot score writeback workflow
 - [ ] Retry-After header support

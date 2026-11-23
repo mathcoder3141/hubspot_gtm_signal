@@ -3,6 +3,8 @@ import os
 
 import requests
 from dotenv import load_dotenv
+from email.utils import parsedate_to_datetime
+from datetime import datetime, timezone
 
 load_dotenv()
 
@@ -37,11 +39,28 @@ class HubSpotClient:
                 break
             elif response.status_code in (429, 500, 502, 503, 504):
                 if i < 2:
-                    time.sleep(2 ** i)
+                    time.sleep(self.get_retry_delay(response, i))
 
         response.raise_for_status()
         
         return response.json()
+
+    def get_retry_delay(self, response, attempt):
+        if response.status_code == 429:
+            retry_after = response.headers.get("Retry-After")
+            if retry_after and retry_after.isdigit():
+                return int(retry_after)
+            elif retry_after:
+                try:
+                    utc_dt = parsedate_to_datetime(retry_after)
+                    now_dt = datetime.now(timezone.utc)
+                    return max(0, (utc_dt - now_dt).total_seconds())
+                except ValueError:
+                    return 2 ** attempt    
+            else:
+                return 2 ** attempt
+        else:
+            return 2 ** attempt
 
     def get_company(self, company_id, properties=None):
         params = {}
