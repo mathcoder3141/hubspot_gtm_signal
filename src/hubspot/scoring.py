@@ -1,7 +1,12 @@
-from pprint import pprint
 from datetime import datetime, timezone
 
-def sort_activities(activities):
+def sort_activities(activities: list) -> list:
+    """
+    Sorts activities based on `hs_timestamp` from most recent to least recent.
+
+    This ensures the assign occurence number function starts from the most recent activity type
+    so that more recent events can be weighted properly.
+    """
     activities = sorted(
         activities,
         key=lambda activity: activity["hs_timestamp"],
@@ -9,7 +14,7 @@ def sort_activities(activities):
     )
     return activities
 
-def assign_occurrence_numbers(activities):
+def assign_occurrence_numbers(activities: list) -> list:
     """
     Assign occurrence numbers to activities based on activity type.
     """
@@ -23,13 +28,21 @@ def assign_occurrence_numbers(activities):
         activity["occurrence_number"] = counts[activity_type]
     return activities
 
-def prepare_activities(activities):
+def prepare_activities(activities: list) -> list:
+    """
+    This function utilizes the `sort_activities()` and `assgin_(occurrence_numbers()`
+    functions.
+    """
     activities = sort_activities(activities)
     activities = assign_occurrence_numbers(activities)
     return activities
 
-def get_age_in_days(timestamp, now=None):
-    utc_dt = timestamp.replace('Z', "+00:00")
+def get_age_in_days(hs_timestamp, now=None) -> int:
+    """
+    Input: hs_timestamp, has the format of 2026-11-22T10:00:00Z. Also takes in a datetime object.
+    Output: Integer representing the number of days since an event.
+    """
+    utc_dt = hs_timestamp.replace('Z', "+00:00")
     utc_dt = datetime.fromisoformat(utc_dt)
     if now is None:
         now = datetime.now(timezone.utc)
@@ -39,7 +52,7 @@ def get_age_in_days(timestamp, now=None):
     difference_days = (now - utc_dt).days
     return difference_days
 
-def get_recency_multiplier(age_in_days):
+def get_recency_multiplier(age_in_days: int) -> float:
     """
     Returns a multiplier / weight that looks on how long
     it's been since the engagement happened
@@ -56,7 +69,7 @@ def get_recency_multiplier(age_in_days):
         multiplier = 0.25
     return multiplier
 
-def get_activity_weight(activity_type, occurrence_number):
+def get_activity_weight(activity_type:str, occurrence_number: int) -> int:
     """
     Return the points for an activity based on its type
     and occurrence number.
@@ -87,14 +100,18 @@ def get_activity_weight(activity_type, occurrence_number):
         weight = 1
     return weight
 
-def calculate_activity_points(activity_type, occurrence_number, age_in_days):
+def calculate_activity_points(activity_type:str, occurrence_number:int, age_in_days:int) -> float:
     """
     Calculate the adjusted points for a single activity.
     """
     adj_points = get_activity_weight(activity_type, occurrence_number) * get_recency_multiplier(age_in_days)
     return adj_points
 
-def score_activities(activities, now=None):
+def score_activities(activities: list, now=None) -> float:
+    """
+    Calculates the score for a set of activities.
+    Capped at 100 per business rule.
+    """
     prepared_activites = prepare_activities(activities)
     score = 0
     for activity in prepared_activites:
@@ -111,7 +128,13 @@ def score_activities(activities, now=None):
     score = min(score, 100)
     return score
 
-def normalize_activities(activities, activity_type):
+def normalize_activities(activities: list, activity_type: str) -> list:
+    """
+    Iterates through a lists of activities and checks to see if
+    they're a activity that should be counted when calculating engagement score.
+
+    Returns a list of dictionaries of the qualifying activites in a consistent format.
+    """
     normalized_activities = []
     if activity_type == 'Call':
         qualifying_property = 'hs_call_disposition'
@@ -143,7 +166,10 @@ def normalize_activities(activities, activity_type):
         normalized_activities.append(normalized_activity)
     return normalized_activities
 
-def group_activities_by_company(activities):
+def group_activities_by_company(activities: list) -> dict:
+    """
+    Aggregates activities by company.
+    """
     company_level_activities = {}
     for activity in activities:
         activity_type = activity['activity_type']
@@ -157,7 +183,10 @@ def group_activities_by_company(activities):
             company_level_activities.setdefault(company_id, []).append(company_activity)
     return company_level_activities
 
-def score_companies(company_activities, now=None):
+def score_companies(company_activities: dict, now=None) -> dict:
+    """
+    Calculates the engagement score for companies.
+    """
     company_scores = {}
     for company, activity in company_activities.items():
         score = score_activities(activity, now=now)

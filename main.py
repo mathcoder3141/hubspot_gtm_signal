@@ -6,7 +6,6 @@ from src.hubspot.scoring import (
 )
 from src.hubspot.pipeline import write_company_scores
 from itertools import chain
-from pprint import pprint
 
 def main():
     client = HubSpotClient()
