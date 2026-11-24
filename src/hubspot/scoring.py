@@ -112,9 +112,9 @@ def score_activities(activities: list, now=None) -> float:
     Calculates the score for a set of activities.
     Capped at 100 per business rule.
     """
-    prepared_activites = prepare_activities(activities)
+    prepared_activities = prepare_activities(activities)
     score = 0
-    for activity in prepared_activites:
+    for activity in prepared_activities:
         activity_type = activity["activity_type"]
         occurrence_number = activity["occurrence_number"]
         hs_timestamp = activity["hs_timestamp"]
