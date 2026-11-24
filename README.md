@@ -10,7 +10,7 @@ Sales and customer-facing teams generate activity across calls, emails, and meet
 
 This project aims to distinguish genuine customer interaction from outbound sales activity and consolidate those signals into a single account-level engagement score.
 
-The intended workflow is:
+The current workflow is:
 
 1. Retrieve engagement records from HubSpot.
 2. Associate activities with their respective companies.
@@ -83,8 +83,6 @@ The planned scoring model will account for:
 
 The intended output is a normalized engagement score from 0 to 100, stored in a custom HubSpot company property.
 
-The scoring implementation is still in progress.
-
 ## Reliability and Engineering Practices
 
 The project is being developed incrementally with an emphasis on reusable code and reliable API interactions.
@@ -96,14 +94,14 @@ Implemented or underway:
 - HTTP error handling.
 - Basic retry logic for rate limits and transient server errors.
 - Exponential backoff.
+- Respect HubSpot `Retry-After` headers.
+- Automated tests.
 
 Planned improvements:
 
-- Respect HubSpot `Retry-After` headers.
 - Safe retry behavior for write operations.
 - Rate-limit handling.
 - Structured logging.
-- Automated tests.
 - Idempotent synchronization.
 
 ## Local Setup
@@ -150,13 +148,18 @@ Ensure `.env` is included in `.gitignore`. Never commit API credentials.
 
 ```text
 hubspot_gtm_signal/
-├── src/
-│   └── hubspot/
-│       └── client.py
-├── tests/
-├── .env
-├── .gitignore
-└── requirements.txt
+├── README.md
+├── main.py
+├── pytest.ini
+├── requirements.txt
+├── src
+│   └── hubspot
+│       ├── __init__.py
+│       ├── client.py
+│       ├── pipeline.py
+│       └── scoring.py
+└── tests
+    └── test_scoring.py
 ```
 
 The structure may evolve as scoring, testing, and synchronization components are added.
@@ -175,7 +178,7 @@ The structure may evolve as scoring, testing, and synchronization components are
 - [x] Engagement scoring model
 - [x] Account-level activity aggregation
 - [x] HubSpot score writeback workflow
-- [ ] Retry-After header support
+- [x] Retry-After header support
 - [ ] Safe write retries and idempotency
 - [ ] Structured logging
 - [x] Automated tests

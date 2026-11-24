@@ -268,7 +268,7 @@ def test_multiple_company_associations_normalized():
             'activity_type': 'Email',
             'hs_timestamp': '2026-11-22T10:00:00Z',
             'company_ids': ["123", "456"]
-   }
+        }
     ]
     assert normalized == normalize_activities(activities=activities, activity_type="Email")
 
