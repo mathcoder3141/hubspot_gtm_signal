@@ -34,7 +34,7 @@ A reusable `HubSpotClient` handles authentication, HTTP requests, and communicat
 
 Implemented functionality includes:
 
-- Session-based authentication using a HubSpot service key.
+- Session-based authentication using a HubSpot service key stored in an environment variable.
 - Reusable HTTP request handling.
 - Company retrieval and property updates.
 - Company lookup by domain.
@@ -74,10 +74,10 @@ Activities without an associated company are excluded from company-level scoring
 
 ## Engagement Scoring
 
-The planned scoring model will account for:
+The scoring model will account for:
 
 - **Recency:** How recently meaningful customer interactions occurred.
-- **Activity rate:** The frequency of meaningful interactions over a defined time window.
+- **Activity frequency:** The frequency of meaningful interactions over a defined time window.
 - **Activity type:** Different weights for calls, meetings, and incoming emails.
 - **Diminishing returns:** Preventing unusually high activity volumes from disproportionately inflating an account's score.
 
@@ -87,22 +87,22 @@ The intended output is a normalized engagement score from 0 to 100, stored in a 
 
 The project is being developed incrementally with an emphasis on reusable code and reliable API interactions.
 
-Implemented or underway:
+Implemented:
 
 - Reusable HTTP session.
 - Cursor-based pagination.
 - HTTP error handling.
-- Basic retry logic for rate limits and transient server errors.
+- Retry logic for rate limits and transient server errors.
 - Exponential backoff.
 - Respect HubSpot `Retry-After` headers.
 - Automated tests.
+- Application logging.
 
 Planned improvements:
 
 - Safe retry behavior for write operations.
-- Rate-limit handling.
-- Structured logging.
 - Idempotent synchronization.
+- Architecture Documentation
 
 ## Local Setup
 
@@ -160,9 +160,8 @@ hubspot_gtm_signal/
 │       └── scoring.py
 └── tests
     └── test_scoring.py
+    └── test_client.py
 ```
-
-The structure may evolve as scoring, testing, and synchronization components are added.
 
 ## Roadmap
 
@@ -180,7 +179,7 @@ The structure may evolve as scoring, testing, and synchronization components are
 - [x] HubSpot score writeback workflow
 - [x] Retry-After header support
 - [ ] Safe write retries and idempotency
-- [ ] Structured logging
+- [x] Application logging
 - [x] Automated tests
 - [ ] End-to-end demonstration
 - [ ] Architecture documentation
