@@ -5,13 +5,14 @@ import requests
 from dotenv import load_dotenv
 from email.utils import parsedate_to_datetime
 from datetime import datetime, timezone
+from typing import Optional
 
 load_dotenv()
 
 class HubSpotClient:
     BASE_URL = "https://api.hubapi.com/crm/objects/2026-09"
 
-    def __init__(self):
+    def __init__(self) -> None:
         token = os.getenv("HUBSPOT_SERVICE_API_KEY")
 
         if not token:
@@ -27,25 +28,53 @@ class HubSpotClient:
             }
         )
 
-    def request(self, method, endpoint, **kwargs):
+    def request(self,
+                method: str,
+                endpoint: str,
+                timeout: int = 30, 
+                **kwargs
+    ) -> dict:
+        """
+        Send an HTTP request to the HubSpot API.
+
+        Retries requests that receive rate-limit or transient server
+        errors using the configured retry delay.
+
+        Returns the decoded JSON response.
+        """
         url = f"{self.BASE_URL}/{endpoint}"
         for i in range(0,3):
             response = self.session.request(
                 method,
                 url,
+                timeout=timeout,
                 **kwargs
-            )
+            )   
+            
             if response.ok:
                 break
-            elif response.status_code in (429, 500, 502, 503, 504):
-                if i < 2:
-                    time.sleep(self.get_retry_delay(response, i))
+            
+            if response.status_code not in (429, 500, 502, 503, 504):
+                response.raise_for_status()
+            
+            if i < 2:
+                time.sleep(self.get_retry_delay(response, i))
 
-        response.raise_for_status()
-        
+        response.raise_for_status() 
         return response.json()
 
-    def get_retry_delay(self, response, attempt):
+    def get_retry_delay(
+        self,
+        response: requests.Response,
+        attempt: int
+    ) -> float:
+        """
+        Calculate the number of seconds to wait before retrying a request.
+
+        Uses the Retry-After header for rate-limit responses when available.
+        Falls back to exponential backoff when no usable retry delay is provided.
+        """
+        fallback_delay = 2 ** attempt
         if response.status_code == 429:
             retry_after = response.headers.get("Retry-After")
             if retry_after and retry_after.isdigit():
@@ -56,13 +85,22 @@ class HubSpotClient:
                     now_dt = datetime.now(timezone.utc)
                     return max(0, (utc_dt - now_dt).total_seconds())
                 except ValueError:
-                    return 2 ** attempt    
+                    return fallback_delay
             else:
-                return 2 ** attempt
+                return fallback_delay
         else:
-            return 2 ** attempt
+            return fallback_delay
 
-    def get_company(self, company_id, properties=None):
+    def get_company(
+            self,
+            company_id: str,
+            properties: Optional[list] = None
+    ):
+        """
+        Retrieve all companies from HubSpot using pagination.
+
+        `limit` controls the number of companies requested per API page.
+        """
         params = {}
 
         if properties:
@@ -74,7 +112,12 @@ class HubSpotClient:
             params=params
         )
 
-    def get_companies(self, limit = 2):
+    def get_companies(self, limit: int = 2) -> list[dict]:
+        """
+        Retrieve all companies from HubSpot using pagination.
+
+        `limit` controls the number of companies requested per API page.
+        """
         companies = []
         after = None
         has_more = True
@@ -104,8 +147,14 @@ class HubSpotClient:
 
         return companies
 
-    def find_company_by_domain(self, domain):
+    def find_company_by_domain(self, domain: str) -> Optional[dict]:
+        """
+        Find a company in HubSpot by its domain.
 
+        Returns the matching company, or None if no company is found.
+
+        Raises ValueError if multiple companies match the domain.
+        """
         filterGroups = [
             {
                 "filters": [
@@ -142,7 +191,16 @@ class HubSpotClient:
         else:
             return company_results[0]
 
-    def update_company(self, company_id, properties):
+    def update_company(
+        self,
+        company_id: str,
+        properties: dict
+    ) -> dict:
+        """
+        Update properties on a HubSpot company.
+
+        Returns the API response for the updated company.
+        """
         payload = {
             "properties": properties
         }
@@ -153,7 +211,21 @@ class HubSpotClient:
             json=payload
         )
 
-    def get_engagements(self, endpoint, limit=100, properties=None, associations=None):
+    def get_engagements(
+        self,
+        endpoint: str,
+        limit: int = 100,
+        properties: Optional[list] = None,
+        associations: Optional[list] = None
+    ) -> list[dict]:
+        """
+        Retrieve all engagements from a HubSpot endpoint using pagination.
+
+        Optionally accepts properties and associations to include
+        in the API response.
+
+        `limit` controls the number of engagements requested per page.
+        """
         engagements = []
         after = None
         has_more = True
