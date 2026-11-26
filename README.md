@@ -104,7 +104,7 @@ Planned improvements:
 
 - Safe retry behavior for write operations.
 - Idempotent synchronization.
-- Architecture documentation
+- Architecture documentation.
 
 ## Local Setup
 
