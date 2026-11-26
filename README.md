@@ -193,8 +193,8 @@ companies and activities retrieved, the number of activities retained after
 normalization, the number of companies scored, and the company scores that
 would be written back.
 
-To perform actual writeback, the dry_run argument in main.py can be changed
-to False after validating the calculated scores in the test environment.
+To perform actual writeback, the `dry_run` argument in `main.py` can be changed
+to `False` after validating the calculated scores in the test environment.
 
 ## Roadmap
 
