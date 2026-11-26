@@ -74,10 +74,11 @@ Activities without an associated company are excluded from company-level scoring
 
 ## Engagement Scoring
 
-The scoring model will account for:
+The scoring model accounts for:
 
 - **Recency:** How recently meaningful customer interactions occurred.
 - **Activity frequency:** The frequency of meaningful interactions over a defined time window.
+- **Diminishing returns:** Repeated interactions of the same type contribute progressively fewer points.
 - **Activity type:** Different weights for calls, meetings, and incoming emails.
 - **Diminishing returns:** Preventing unusually high activity volumes from disproportionately inflating an account's score.
 
@@ -97,12 +98,13 @@ Implemented:
 - Respect HubSpot `Retry-After` headers.
 - Automated tests.
 - Application logging.
+- Request timeouts.
 
 Planned improvements:
 
 - Safe retry behavior for write operations.
 - Idempotent synchronization.
-- Architecture Documentation
+- Architecture documentation
 
 ## Local Setup
 
@@ -159,7 +161,7 @@ hubspot_gtm_signal/
 │       ├── pipeline.py
 │       └── scoring.py
 └── tests
-    └── test_scoring.py
+    ├── test_scoring.py
     └── test_client.py
 ```
 
