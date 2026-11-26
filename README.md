@@ -77,10 +77,9 @@ Activities without an associated company are excluded from company-level scoring
 The scoring model accounts for:
 
 - **Recency:** How recently meaningful customer interactions occurred.
-- **Activity frequency:** The frequency of meaningful interactions over a defined time window.
-- **Diminishing returns:** Repeated interactions of the same type contribute progressively fewer points.
+- **Occurrence:** Repeated interactions of the same type contribute progressively fewer points.
 - **Activity type:** Different weights for calls, meetings, and incoming emails.
-- **Diminishing returns:** Preventing unusually high activity volumes from disproportionately inflating an account's score.
+- **Recency window:** Activities older than 30 days do not contribute to the score.
 
 The intended output is a normalized engagement score from 0 to 100, stored in a custom HubSpot company property.
 
@@ -165,6 +164,38 @@ hubspot_gtm_signal/
     └── test_client.py
 ```
 
+## End-to-End Demonstration
+
+The integration can be run against a HubSpot developer or test account to
+demonstrate the complete workflow from CRM retrieval through score generation.
+
+Run:
+
+```bash
+python main.py
+```
+
+The current pipeline runs in dry-run mode, so it retrieves live HubSpot data
+and calculates company-level engagement scores without modifying HubSpot
+records.
+
+The execution demonstrates:
+1. Authentication with HubSpot.
+2. Company retrieval with pagination.
+3. Call, meeting, and email retrieval with pagination.
+4. Activity classification.
+5. Company association.
+6. Engagement scoring.
+7. Account-level score generation.
+8. Dry-run writeback logging.
+A typical execution will produce application logs showing the number of
+companies and activities retrieved, the number of activities retained after
+normalization, the number of companies scored, and the company scores that
+would be written back.
+
+To perform actual writeback, the dry_run argument in main.py can be changed
+to False after validating the calculated scores in the test environment.
+
 ## Roadmap
 
 - [x] HubSpot API authentication
@@ -183,7 +214,7 @@ hubspot_gtm_signal/
 - [ ] Safe write retries and idempotency
 - [x] Application logging
 - [x] Automated tests
-- [ ] End-to-end demonstration
+- [x] End-to-end demonstration
 - [ ] Architecture documentation
 
 ## Project Goals
